@@ -1,29 +1,39 @@
 import axios from 'axios';
 import React ,{useState,useEffect} from 'react'
-import '../../assets/delete.png'
+
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import Loader from '../Loader.jsx';
 export default function Index() {
-
-    const[users,setUser] = useState([])
+    let [loader,setLoader]=useState(false);
+    const[users,setUser] = useState([]);
+  
     const getUsers = async()=>{
         const {data} = await axios.get("https://crud-users-gold.vercel.app/users");
         setUser(data.users);
-
+        setLoader(false);
     }
     const deleteUser =async (id)=>{
+      setLoader(true);
       const{data}= await axios.delete(`https://crud-users-gold.vercel.app/users/${id}`);
       console.log(data);
       if(data.message=='success'){
         toast.success('users deleted successfully');
+        setLoader(false);
+        getUsers();
       }
     }
+   
     useEffect(()=>{
-      getUsers();
-    },[users]);
-    useEffect(()=>{
+         setLoader(true);
         getUsers();
     },[]);
+
+    if(loader){
+      return(
+        <Loader/>
+      )
+    }
   return (
     <>
     <div className="container-fluid">
@@ -118,6 +128,7 @@ export default function Index() {
       <th scope="col">Password</th>
       <th scope="col">action</th>
       <th className='text-center' scope="col">Details</th>
+      <th  className = 'text-center'scope="col">Edit</th>
     </tr>
   </thead>
   <tbody>
@@ -131,7 +142,7 @@ export default function Index() {
                 <td>{user.password}</td>
                 <td><p className='bg-danger py-1 rounded-pill text-center del' onClick={()=>deleteUser(user._id)}>Delete</p></td>
                 <td><Link to={`/users/${user._id}`}  className='bg-primary p-1 d-flex justify-content-center rounded-pill text-center detail text-decoration-none text-white'>Details</Link></td>
-
+                <td><Link to={`/users/edit/${user._id}`} className='bg-primary p-1 d-flex justify-content-center rounded-pill text-center detail text-decoration-none text-white'>Edit</Link></td>
             </tr>
             </React.Fragment>
         

@@ -4,7 +4,9 @@ import { toast } from 'react-toastify'
 import Input from './Input.jsx'
 import { useNavigate } from 'react-router-dom';
 import {validateData} from '../validation/Validate.js'
+import Loader from '../Loader.jsx';
 export default function Create() {
+  let [loader,setLoader]=useState(false);
   let[error,setErrors]=useState({
     name:'',
     email:'',
@@ -16,6 +18,7 @@ export default function Create() {
         email:'',
         password:''
     })
+    const[backError,setBackError]=useState('');
    const handelData = (e)=>{
     e.preventDefault();
     const {name,value}=e.target;
@@ -26,19 +29,32 @@ export default function Create() {
    }
    const sendData =async (e)=>{
     e.preventDefault();
+    setLoader(true);
     if(Object.keys(validateData(user)).length >0){
       setErrors(validateData(user));
+      
     }else{
-    const {data} = await axios.post("https://crud-users-gold.vercel.app/users/",user);
-    console.log(data);
-    if(data.message == "success"){
-    toast.success("user added successfully");
-    navigate('/users/index');
-    }}
+      try{const {data} = await axios.post("https://crud-users-gold.vercel.app/users/",user);
+      console.log(data);
+      if(data.message == "success"){
+      toast.success("user added successfully");
+      navigate('/users/index');
+      setLoader(false);
+      }
     
+    }
+  catch(err){
+    setBackError(err.response.data.message);
+    setLoader(false);
+  }}
+}
+  if(loader){
+    return(
+      <Loader/>
+    )
+  }
     
-    
-   }
+   
   return (
     <>
     <div className="container-fluid">
@@ -124,6 +140,7 @@ export default function Create() {
       </div>
     </div>
     <div className="col py-3">
+      {backError && <p className='text-danger'>{backError}</p>}
     <form onSubmit={sendData}>
     <Input error={error} id={'username'} title={'user name'} type={'text'} name={'name'} handelData={handelData /* declare variable handeldata , its value is fun*/ }/> 
     <Input error={error} id={'email'} title={'user email'} type={'email'} name={'email'} handelData={handelData}/>

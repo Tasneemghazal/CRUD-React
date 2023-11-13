@@ -1,19 +1,73 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import Input from "./Input.jsx";
+import { useNavigate } from "react-router-dom";
+import { validateData } from "../validation/Validate.js";
+import Loader from "../Loader.jsx";
 import { useParams } from "react-router-dom";
 
-export default function Details() {
-  let [user, setUser ] = useState({});
+export default function Update() {
+  let [loader, setLoader] = useState(false);
+  let [error, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const navigate = useNavigate();
+  let [user, setUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const { id } = useParams("id");
   const getUser = async () => {
     const { data } = await axios.get(
-      `https://crud-users-gold.vercel.app/users/${id}`);
+      `https://crud-users-gold.vercel.app/users/${id}`
+    );
     console.log(data.user);
     setUser(data.user);
   };
   useEffect(() => {
     getUser();
   }, []);
+  const [backError, setBackError] = useState("");
+  const handelData = (e) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+    setUser({
+      ...user,
+      [name]: value,
+    });
+    console.log(user);
+  };
+  const sendData = async (e) => {
+    e.preventDefault();
+    setLoader(true);
+    if (Object.keys(validateData(user)).length > 0) {
+      setErrors(validateData(user));
+    } else {
+      try {
+        const { data } = await axios.post(
+          "https://crud-users-gold.vercel.app/users/",
+          user
+        );
+        console.log(data);
+        if (data.message == "success") {
+          toast.success("user updated successfully");
+          navigate("/users/index");
+          setLoader(false);
+        }
+      } catch (err) {
+        setBackError(err.response.data.message);
+        setLoader(false);
+      }
+    }
+  };
+  if (loader) {
+    return <Loader />;
+  }
+
   return (
     <>
       <div className="container-fluid">
@@ -192,10 +246,46 @@ export default function Details() {
             </div>
           </div>
           <div className="col py-3">
-             Details for :  {user._id}
-             <br />
-             Name: {user.name}
-           </div>
+            {backError && <p className="text-danger">{backError}</p>}
+            <form onSubmit={sendData}>
+              <Input
+                error={error}
+                id={"username"}
+                title={"user name"}
+                type={"text"}
+                name={"name"}
+                handelData={handelData}/* declare variable handeldata , its value is fun*/
+                value={user.name}
+              />
+              <Input
+                error={error}
+                id={"email"}
+                title={"user email"}
+                type={"email"}
+                name={"email"}
+                handelData={handelData}
+                value={user.email}
+              />
+              <Input
+                error={error}
+                id={"password"}
+                title={"user password"}
+                type={"password"}
+                customClass="bg-secondary"
+                name={"password"}
+                handelData={handelData}
+                value={user.password}
+              />
+
+              <div className="mb-3">
+                <input
+                  type="submit"
+                  className="form-control bg-body-secondary"
+                  value="Add User"
+                />
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </>
