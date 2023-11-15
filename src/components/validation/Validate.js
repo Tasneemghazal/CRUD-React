@@ -2,8 +2,8 @@ export  const validateData =(user)=>{
     let errors ={};
     if(user.name.trim()==""){
         errors.name ='name is required';
-    }else if(user.name.trim().length<3){
-        errors.name='# of chars must be greater than 4 ';
+    }else if(user.name.trim().length<6){
+        errors.name='# of chars must be greater than 6 ';
     }
     if(user.email.trim()==""){
         errors.email ='email is required';

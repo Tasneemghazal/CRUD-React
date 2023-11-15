@@ -32,6 +32,7 @@ export default function Create() {
     setLoader(true);
     if(Object.keys(validateData(user)).length >0){
       setErrors(validateData(user));
+      setLoader(false);
       
     }else{
       try{const {data} = await axios.post("https://crud-users-gold.vercel.app/users/",user);
@@ -42,17 +43,17 @@ export default function Create() {
       setLoader(false);
       }
     
-    }
-  catch(err){
+    }catch(err){
     setBackError(err.response.data.message);
+    setErrors([]);
     setLoader(false);
   }}
 }
-  if(loader){
-    return(
-      <Loader/>
-    )
-  }
+ if(loader){
+  return (
+  <Loader/>
+  );
+ }
     
    
   return (
