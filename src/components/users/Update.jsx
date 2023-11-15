@@ -15,11 +15,7 @@ export default function Update() {
     password: "",
   });
   const navigate = useNavigate();
-  let [user, setUser] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  let [user, setUser] = useState({});
   const { id } = useParams("id");
   const getUser = async () => {
     const { data } = await axios.get(
@@ -28,9 +24,6 @@ export default function Update() {
     console.log(data.user);
     setUser(data.user);
   };
-  useEffect(() => {
-    getUser();
-  }, []);
   const [backError, setBackError] = useState("");
   const handelData = (e) => {
     e.preventDefault();
@@ -46,10 +39,11 @@ export default function Update() {
     setLoader(true);
     if (Object.keys(validateData(user)).length > 0) {
       setErrors(validateData(user));
+      setLoader(false);
     } else {
       try {
-        const { data } = await axios.post(
-          "https://crud-users-gold.vercel.app/users/",
+        const { data } = await axios.put(
+          `https://crud-users-gold.vercel.app/users/${id}`,
           user
         );
         console.log(data);
@@ -60,12 +54,20 @@ export default function Update() {
         }
       } catch (err) {
         setBackError(err.response.data.message);
+        setErrors([]);
         setLoader(false);
       }
+  
     }
+
   };
-  if (loader) {
-    return <Loader />;
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  if(loader){
+  return (<Loader />);
   }
 
   return (
@@ -281,7 +283,7 @@ export default function Update() {
                 <input
                   type="submit"
                   className="form-control bg-body-secondary"
-                  value="Add User"
+                  value="Update"
                 />
               </div>
             </form>
